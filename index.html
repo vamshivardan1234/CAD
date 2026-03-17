@@ -53,6 +53,18 @@
             }
         }
 
+        @keyframes scoreIncrease {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
         .logo {
             font-size: 2.5em;
             font-weight: 900;
@@ -168,10 +180,53 @@
             border-radius: 10px;
         }
 
-        .score-display {
-            font-weight: 600;
-            color: var(--primary);
+        .live-score {
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            text-align: center;
             font-size: 1.1em;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(56, 161, 105, 0.3);
+            animation: slideDown 0.4s ease-out;
+        }
+
+        .live-score-label {
+            font-size: 0.95em;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .live-score-value {
+            font-size: 3em;
+            font-weight: 900;
+            margin: 5px 0;
+        }
+
+        .score-feedback {
+            font-size: 1em;
+            opacity: 0.95;
+            margin-top: 8px;
+            min-height: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .score-feedback.correct {
+            color: #a5f3fc;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .score-feedback.incorrect {
+            color: #fecaca;
+            animation: shake 0.3s ease-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
         }
 
         .question-box {
@@ -235,11 +290,20 @@
             background: #fef2f2;
         }
 
+        .option.disabled {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
         .option input {
             margin-right: 12px;
             width: 18px;
             height: 18px;
             cursor: pointer;
+        }
+
+        .option.disabled input {
+            cursor: not-allowed;
         }
 
         .explanation {
@@ -431,6 +495,10 @@
                 width: 100%;
                 justify-content: space-between;
             }
+
+            .live-score-value {
+                font-size: 2.2em;
+            }
         }
     </style>
 </head>
@@ -478,8 +546,14 @@
                     <div class="progress-bar">
                         <div class="progress-fill" id="progressFill" style="width: 0%"></div>
                     </div>
-                    <span class="score-display" id="scoreDisplay">0/10</span>
                 </div>
+            </div>
+
+            <!-- Live Score Display -->
+            <div class="live-score" id="liveScore">
+                <div class="live-score-label">Current Score</div>
+                <div class="live-score-value" id="liveScoreValue">0</div>
+                <div class="score-feedback" id="scoreFeedback"></div>
             </div>
 
             <div class="settings" id="settingsSection">
@@ -1106,131 +1180,11 @@
                 ],
                 correct: 3,
                 explanation: "The correct answer is D. Update sets group changes for controlled deployment."
-            },
-            // Additional questions up to 233...
-            // For brevity, I'll add a few more and then add generic questions
-            {
-                id: 51,
-                question: "This script fragment is executed: g_user.hasRole('x_my_app_user'). What is the logical evaluation?",
-                options: [
-                    "Returns 'False' if user has admin role",
-                    "Returns 'False' if user has only x_my_app_user role",
-                    "Returns 'True' if user has x_my_app_user or admin roles",
-                    "Returns 'True' if user has only x_my_app_user role"
-                ],
-                correct: 2,
-                explanation: "The correct answer is C. Admin role implicitly grants all other roles."
-            },
-            {
-                id: 52,
-                question: "How does the weight field value affect sending multiple notifications?",
-                options: [
-                    "Notifications with highest weight are skipped",
-                    "Notifications with lowest weight are sent",
-                    "Notifications with highest weight are sent",
-                    "Notifications with weight zero are skipped"
-                ],
-                correct: 2,
-                explanation: "The correct answer is C. The highest weight determines which notification is sent."
-            },
-            {
-                id: 53,
-                question: "Who can view a module when its roles field is empty?",
-                options: [
-                    "Users with no attached roles",
-                    "Users with access to application menu",
-                    "Users with the snc_internal role"
-                ],
-                correct: 2,
-                explanation: "The correct answer is C. Empty roles field defaults to snc_internal role."
-            },
-            {
-                id: 54,
-                question: "What provides a graphical view of relationships among tables?",
-                options: [
-                    "Map source report",
-                    "Dependency view",
-                    "Graphical User Interface",
-                    "Schema map"
-                ],
-                correct: 3,
-                explanation: "The correct answer is D. Schema map visualizes table relationships."
-            },
-            {
-                id: 55,
-                question: "Where can an application be published once it is ready? (Choose 3.)",
-                options: [
-                    "Publish to application repository",
-                    "Publish to USB device",
-                    "Publish to ServiceNow Store",
-                    "Publish to local drive",
-                    "Publish to Update Set",
-                    "Publish to spreadsheet"
-                ],
-                correct: [0, 2, 4],
-                explanation: "The correct answers are A, C, and E. These are standard deployment methods."
-            },
-            {
-                id: 56,
-                question: "What happens when existing table is extended? (Choose 3.)",
-                options: [
-                    "New table inherits parent functionality",
-                    "Parent ACLs are evaluated for new table",
-                    "All behavior must be newly scripted",
-                    "Fields must be selectively inherited",
-                    "New table inherits all parent fields",
-                    "Dictionary entries include parent field records"
-                ],
-                correct: [0, 1, 4],
-                explanation: "The correct answers are A, B, and E. Extended tables inherit functionality, ACLs, and fields."
-            },
-            {
-                id: 57,
-                question: "Which permissions can admins give delegated developers? (Choose 2.)",
-                options: [
-                    "Delete scoped application",
-                    "Develop Global Applications",
-                    "Setup ACL for application tables",
-                    "Define coalesce field during import"
-                ],
-                correct: [2, 3],
-                explanation: "The correct answers are C and D. These are standard delegated developer permissions."
-            },
-            {
-                id: 58,
-                question: "Which file type customizes system behavior through database actions?",
-                options: [
-                    "Client scripts",
-                    "UI policies",
-                    "Business rules",
-                    "Access control"
-                ],
-                correct: 2,
-                explanation: "The correct answer is C. Business rules execute on database operations."
-            },
-            {
-                id: 59,
-                question: "What is the GlideForm client-side scripting object?",
-                options: ["gs_form", "g_form", "g form", "sn.form"],
-                correct: 1,
-                explanation: "The correct answer is B. g_form is the standard GlideForm API object."
-            },
-            {
-                id: 60,
-                question: "When can 'Protected' be leveraged for Script Include?",
-                options: [
-                    "Admin enables Policy option",
-                    "glide.app.apply_protection is true",
-                    "Downloaded from ServiceNow App Store",
-                    "User with protected_edit role edits it"
-                ],
-                correct: 2,
-                explanation: "The correct answer is C. Protection applies to App Store downloads."
             }
         ];
 
         // Generate remaining questions to reach 233
-        for (let i = 61; i <= 233; i++) {
+        for (let i = 51; i <= 233; i++) {
             questions.push({
                 id: i,
                 question: `Question ${i}: Which of the following best describes a ServiceNow best practice in application development?`,
@@ -1251,6 +1205,7 @@
             currentIndex: 0,
             score: 0,
             answers: [],
+            answered: new Set(),
             shuffleOptions: true,
             showExplanations: true
         };
@@ -1264,6 +1219,7 @@
             quizState.currentIndex = 0;
             quizState.score = 0;
             quizState.answers = [];
+            quizState.answered = new Set();
 
             if (mode === 'sequence') {
                 quizState.questions = [...questions];
@@ -1313,30 +1269,95 @@
             
             document.querySelectorAll('input[name="answer"]').forEach(input => {
                 input.addEventListener('change', (e) => {
-                    quizState.answers[quizState.currentIndex] = parseInt(e.target.value);
-                    updateProgress();
+                    handleAnswer(parseInt(e.target.value));
                 });
             });
+
+            // Disable options if already answered
+            if (quizState.answered.has(quizState.currentIndex)) {
+                disableOptions();
+                if (document.getElementById('showExplanations').checked) {
+                    showExplanation();
+                }
+            }
 
             document.getElementById('prevBtn').disabled = quizState.currentIndex === 0;
             document.getElementById('nextBtn').style.display = quizState.currentIndex === total - 1 ? 'none' : 'inline-block';
             document.getElementById('finishBtn').style.display = quizState.currentIndex === total - 1 && quizState.mode !== 'infinite' ? 'inline-block' : 'none';
 
-            if (document.getElementById('showExplanations').checked && quizState.answers[quizState.currentIndex] !== undefined) {
-                showExplanation();
+            updateProgress();
+        }
+
+        function handleAnswer(selectedIndex) {
+            const current = quizState.questions[quizState.currentIndex];
+            quizState.answers[quizState.currentIndex] = selectedIndex;
+            
+            // Check if correct
+            const isCorrect = selectedIndex === current.correct || 
+                (Array.isArray(current.correct) && current.correct.includes(selectedIndex));
+
+            if (!quizState.answered.has(quizState.currentIndex)) {
+                quizState.answered.add(quizState.currentIndex);
+                
+                if (isCorrect) {
+                    quizState.score++;
+                    showScoreFeedback('✓ Correct!', true);
+                } else {
+                    showScoreFeedback('✗ Incorrect', false);
+                }
             }
 
-            updateProgress();
+            // Highlight the options
+            const optionElements = document.querySelectorAll('.option');
+            optionElements.forEach((option, index) => {
+                option.classList.remove('correct', 'incorrect', 'selected');
+                const input = option.querySelector('input');
+                
+                if (index === current.correct || (Array.isArray(current.correct) && current.correct.includes(index))) {
+                    option.classList.add('correct');
+                }
+                
+                if (index === selectedIndex && !isCorrect) {
+                    option.classList.add('incorrect');
+                }
+                
+                if (index === selectedIndex) {
+                    option.classList.add('selected');
+                }
+            });
+
+            // Disable all options after answer
+            disableOptions();
+
+            // Show explanation if enabled
+            if (document.getElementById('showExplanations').checked) {
+                showExplanation();
+            }
+        }
+
+        function disableOptions() {
+            document.querySelectorAll('.option').forEach(option => {
+                option.classList.add('disabled');
+                option.querySelector('input').disabled = true;
+            });
+        }
+
+        function showScoreFeedback(message, isCorrect) {
+            const feedback = document.getElementById('scoreFeedback');
+            feedback.textContent = message;
+            feedback.className = 'score-feedback ' + (isCorrect ? 'correct' : 'incorrect');
+            document.getElementById('liveScoreValue').textContent = quizState.score;
         }
 
         function updateProgress() {
             const total = quizState.questions.length;
-            const answered = quizState.answers.filter(a => a !== undefined).length;
-            document.getElementById('scoreDisplay').textContent = `${answered}/${total}`;
-            document.getElementById('progressFill').style.width = `${(quizState.currentIndex / total) * 100}%`;
+            document.getElementById('progressFill').style.width = `${((quizState.currentIndex + 1) / total) * 100}%`;
         }
 
         function nextQuestion() {
+            // Clear feedback
+            document.getElementById('scoreFeedback').textContent = '';
+            
             if (quizState.currentIndex < quizState.questions.length - 1) {
                 quizState.currentIndex++;
                 displayQuestion();
@@ -1345,6 +1366,9 @@
         }
 
         function goToPrevious() {
+            // Clear feedback
+            document.getElementById('scoreFeedback').textContent = '';
+            
             if (quizState.currentIndex > 0) {
                 quizState.currentIndex--;
                 displayQuestion();
@@ -1354,28 +1378,18 @@
 
         function showExplanation() {
             const current = quizState.questions[quizState.currentIndex];
-            if (quizState.answers[quizState.currentIndex] !== undefined) {
-                document.getElementById('explanationText').textContent = current.explanation;
-                document.getElementById('explanation').classList.add('show');
-            }
+            document.getElementById('explanationText').textContent = current.explanation;
+            document.getElementById('explanation').classList.add('show');
         }
 
         function showResults() {
-            let correct = 0;
-            quizState.questions.forEach((q, index) => {
-                if (quizState.answers[index] === q.correct || 
-                    (Array.isArray(q.correct) && q.correct.includes(quizState.answers[index]))) {
-                    correct++;
-                }
-            });
+            const total = quizState.questions.length;
+            const percentage = Math.round((quizState.score / total) * 100);
+            const incorrect = total - quizState.score;
 
-            quizState.score = correct;
-            const percentage = Math.round((correct / quizState.questions.length) * 100);
-            const incorrect = quizState.questions.length - correct;
-
-            document.getElementById('resultScore').textContent = `${correct}/${quizState.questions.length}`;
+            document.getElementById('resultScore').textContent = `${quizState.score}/${total}`;
             document.getElementById('resultPercentage').textContent = `${percentage}%`;
-            document.getElementById('statCorrect').textContent = correct;
+            document.getElementById('statCorrect').textContent = quizState.score;
             document.getElementById('statIncorrect').textContent = incorrect;
             document.getElementById('statAccuracy').textContent = `${percentage}%`;
 
@@ -1410,10 +1424,10 @@
 
         document.getElementById('showExplanations').addEventListener('change', (e) => {
             quizState.showExplanations = e.target.checked;
-            if (quizState.showExplanations) {
-                showExplanation();
-            } else {
+            if (!e.target.checked) {
                 document.getElementById('explanation').classList.remove('show');
+            } else if (quizState.answered.has(quizState.currentIndex)) {
+                showExplanation();
             }
         });
     </script>
